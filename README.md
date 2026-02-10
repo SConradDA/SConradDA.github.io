@@ -1,2 +1,2 @@
+@@ -0,0 +1 @@
 # SConradDA.github.io
-My personal portfolio and data analytics projects
