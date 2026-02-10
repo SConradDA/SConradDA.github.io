@@ -1,157 +1,259 @@
-Anthony Awoyele - Cybersecurity Portfolio
+"use strict";
 
-# sidebar
+// element toggle function
+const elementToggleFunc = function (elem) {
+  elem.classList.toggle("active");
+};
 
-alt = Scotty Conrad
-Scotty Conrad
-DataProfessional 
+// sidebar variables
+const sidebar = document.querySelector("[data-sidebar]");
+const sidebarBtn = document.querySelector("[data-sidebar-btn]");
 
-Show Contacts
+// sidebar toggle functionality for mobile
+sidebarBtn.addEventListener("click", function () {
+  elementToggleFunc(sidebar);
+});
 
-Email
-Scottycnrd@gmail.com 
+// custom select variables
+const select = document.querySelector("[data-select]");
+const selectItems = document.querySelectorAll("[data-select-item]");
+const selectValue = document.querySelector("[data-selecct-value]");
+const filterBtn = document.querySelectorAll("[data-filter-btn]");
 
-Location
-Bowling Green, KY USA 
+select.addEventListener("click", function () {
+  elementToggleFunc(this);
+});
 
-# navbar
+// add event in all select items
+for (let i = 0; i < selectItems.length; i++) {
+  selectItems[i].addEventListener("click", function () {
+    let selectedValue = this.innerText.toLowerCase();
+    selectValue.innerText = this.innerText;
+    elementToggleFunc(select);
+    filterFunc(selectedValue);
+  });
+}
 
-About
-Portfolio
-Blog
-Certificate
+// filter variables
+const filterItems = document.querySelectorAll("[data-filter-item]");
 
-# about
+const filterFunc = function (selectedValue) {
+  for (let i = 0; i < filterItems.length; i++) {
+    if (selectedValue === "all") {
+      filterItems[i].classList.add("active");
+    } else if (selectedValue === filterItems[i].dataset.category) {
+      filterItems[i].classList.add("active");
+    } else {
+      filterItems[i].classList.remove("active");
+    }
+  }
+};
 
-About me
+// add event in all filter button items for large screen
+let lastClickedBtn = filterBtn[0];
 
-I’m an operations-focused data professional transitioning into data analytics, with experience in performance tracking, KPI reporting, and process improvement. I enjoy turning complex operational data into clear, actionable insights that help teams understand what’s happening and where to focus next.
+for (let i = 0; i < filterBtn.length; i++) {
+  filterBtn[i].addEventListener("click", function () {
+    let selectedValue = this.innerText.toLowerCase();
+    selectValue.innerText = this.innerText;
+    filterFunc(selectedValue);
 
-My role is to help teams make better decisions by building reliable reports, dashboards, and performance views that are accurate, easy to understand, and useful in real-world operations. I focus on making data practical and accessible, not just visually appealing. My goal is to communicate insights clearly and support smarter, data-driven decision-making across the organization.
+    lastClickedBtn.classList.remove("active");
+    this.classList.add("active");
+    lastClickedBtn = this;
+  });
+}
 
-## what i'm doing
+// contact form variables
+const form = document.querySelector("[data-form]");
+const formInputs = document.querySelectorAll("[data-form-input]");
+const formBtn = document.querySelector("[data-form-btn]");
 
-What i'm doing
+// add event to all form input field
+for (let i = 0; i < formInputs.length; i++) {
+  formInputs[i].addEventListener("input", function () {
+    // check form validation
+    if (form.checkValidity()) {
+      formBtn.removeAttribute("disabled");
+    } else {
+      formBtn.setAttribute("disabled", "");
+    }
+  });
+}
 
-Learning and Development
-Deepening my cybersecurity expertise through diverse learning methods, including podcasts and online courses, while cultivating a security-oriented mindset for everyday scenarios.
+// page navigation variables
+const navigationLinks = document.querySelectorAll("[data-nav-link]");
+const pages = document.querySelectorAll("[data-page]");
 
-AI Exploration
-Keeping pace with cutting-edge AI advancements across STEM fields, developing practical AI applications for daily use, and envisioning AI's role in shaping humanity's future.
+// add event to all nav link
+for (let i = 0; i < navigationLinks.length; i++) {
+  navigationLinks[i].addEventListener("click", function () {
+    for (let i = 0; i < pages.length; i++) {
+      if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
+        pages[i].classList.add("active");
+        navigationLinks[i].classList.add("active");
+        window.scrollTo(0, 0);
+      } else {
+        pages[i].classList.remove("active");
+        navigationLinks[i].classList.remove("active");
+      }
+    }
+  });
+}
 
-Cryptocurrency
-Actively contributing to Decentralized Finance projects as a community leader, promoting privacy, safety, unity, and cryptocurrency education.
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("certificates.json")
+    .then((response) => response.json())
+    .then((data) => {
+      const certificateList = document.getElementById("certificateList");
 
-Personal Development
-Expanding my worldview through philosophical and historical readings, while delving into the intricacies of human behavior and decision-making processes.
+      data.forEach((cert) => {
+        const li = document.createElement("li");
+        li.className = "certificate-item active";
+        li.setAttribute("data-filter-item", "");
+        li.setAttribute("data-category", cert.category.toLowerCase());
 
+        li.innerHTML = `
+          <a href="${cert.url}" target="_blank" class="certificate-link">
+            <figure class="certificate-img">
+              <div class="certificate-item-icon-box">
+                <ion-icon name="eye-outline"></ion-icon>
+              </div>
+              <img src="./assets/images/certs/${cert.category.toLowerCase()}/${
+          cert.alt
+        }.png" alt="${cert.alt}" loading="lazy">
+            </figure>
+            <h3 class="certificate-title">${cert.title}</h3>
+            <p class="certificate-category">${cert.category}</p>
+          </a>
+        `;
 
+        certificateList.appendChild(li);
+      });
 
-# certificate
+      // Call the function to set up filtering
+      setupFiltering();
+    })
+    .catch((error) => console.error("Error loading certificates:", error));
+});
 
-Certificate
+function setupFiltering() {
+  const filterButtons = document.querySelectorAll("[data-filter-btn]");
+  const filterItems = document.querySelectorAll("[data-filter-item]");
+  const filterSelect = document.querySelector(".filter-select");
+  const selectValue = document.querySelector(".select-value");
+  const selectList = document.querySelector(".select-list");
+  const selectItems = document.querySelectorAll(".select-item button");
 
-All
-Google
-Cybrary
-TryHackMe
-ISC2
-IBM
-AWS
-Coursera
+  function filterCertificates(filterValue) {
+    filterItems.forEach((item) => {
+      if (
+        filterValue === "all" ||
+        item.getAttribute("data-category") === filterValue
+      ) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+  }
 
+  // Button filtering
+  filterButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const filterValue = this.getAttribute("data-filter-btn");
 
-Select category
-All
-Google
-Cybrary
-TryHackMe
-ISC2
-AWS
-Coursera
+      filterButtons.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
 
-alt = google_cybersecurity
-Google Cybersecurity
-Google
+      // Update dropdown to match selected filter
+      selectValue.textContent = this.textContent;
+      selectItems.forEach((item) => {
+        item.classList.toggle(
+          "active",
+          item.getAttribute("data-select-btn") === filterValue
+        );
+      });
 
-alt = linux
-Linux Fundamentals 2
-Linux
+      filterCertificates(filterValue);
+    });
+  });
 
-alt = linux
-Linux Fundamentals 3
-Linux
+  // Dropdown functionality
+  filterSelect.addEventListener("click", () => {
+    selectList.style.display =
+      selectList.style.display === "none" ? "block" : "none";
+  });
 
-alt = orizon
-Orizon
-Web development
+  // Close dropdown when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!filterSelect.contains(e.target)) {
+      selectList.style.display = "none";
+    }
+  });
 
-alt = fundo
-Fundo
-Web design
+  selectItems.forEach((item) => {
+    item.addEventListener("click", function () {
+      const filterValue = this.getAttribute("data-select-btn");
+      selectValue.textContent = this.textContent;
+      selectList.style.display = "none";
 
-alt = brawlhalla
-Brawlhalla
-Applications
+      selectItems.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
 
-alt = dsm.
-DSM.
-Web design
+      // Update filter buttons to match selected dropdown item
+      filterButtons.forEach((btn) => {
+        btn.classList.toggle(
+          "active",
+          btn.getAttribute("data-filter-btn") === filterValue
+        );
+      });
 
-alt = metaspark
-MetaSpark
-Web design
+      filterCertificates(filterValue);
+    });
+  });
+}
 
-alt = summary
-Summary
-Web development
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("software.json")
+    .then((response) => response.json())
+    .then((data) => {
+      const toolsList = document.getElementById("softwareList");
 
-alt = task manager
-Task Manager
-Applications
+      data.forEach((tool) => {
+        const li = document.createElement("li");
+        li.className = "software-item";
 
-alt = arrival
-Arrival
-Web development
+        li.innerHTML = `
+          <a href="#">
+            <img src="./assets/images/software/${tool.image}" alt="${tool.name}" class="software-image">
+          </a>
+        `;
 
+        toolsList.appendChild(li);
+      });
+    })
+    .catch((error) => console.error("Error loading software:", error));
+});
 
+document.addEventListener("DOMContentLoaded", function () {
+  fetch("tools.json")
+    .then((response) => response.json())
+    .then((data) => {
+      const toolsList = document.getElementById("toolsList");
 
-# blog
+      data.forEach((tool) => {
+        const li = document.createElement("li");
+        li.className = "tools-item";
 
-Blog
+        li.innerHTML = `
+          <a href="#">
+            <img src="./assets/images/tools/${tool.image}" alt="${tool.name}" class="tool-image">
+          </a>
+        `;
 
-alt = Design conferences in 2022
-Design
-Fab 23, 2022
-Design conferences in 2022
-Veritatis et quasi architecto beatae vitae dicta sunt, explicabo.
-
-alt = Best fonts every designer
-Design
-Fab 23, 2022
-Best fonts every designer
-Sed ut perspiciatis, nam libero tempore, cum soluta nobis est eligendi.
-
-alt = Design digest #80
-Design
-Fab 23, 2022
-Design digest #80
-Excepteur sint occaecat cupidatat no proident, quis nostrum exercitationem ullam corporis suscipit.
-
-alt = UI interactions of the week
-Design
-Fab 23, 2022
-UI interactions of the week
-Enim ad minim veniam, consectetur adipiscing elit, quis nostrud exercitation ullamco laboris nisi.
-
-alt = The forgotten art of spacing
-Design
-Fab 23, 2022
-The Forgotten Art Of Spacing
-Maxime placeat, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-
-alt = Design digest #79
-Design
-Fab 23, 2022
-Design Digest #79
-Optio cumque nihil impedit uo minus quod maxime placeat, velit esse cillum.
+        toolsList.appendChild(li);
+      });
+    })
+    .catch((error) => console.error("Error loading tools:", error));
+});
